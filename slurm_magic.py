@@ -160,13 +160,17 @@ class SlurmMagics(Magics):
         pass
 
     def _execute(self, line, input=None, stderr=False):
+        non_blocking = ["srun"]
+
         name = inspect.stack()[1][3]
         process = Popen([name] + line.split(), stdin=PIPE, stdout=PIPE, stderr=PIPE)
-        stdout, stderr = process.communicate(input)
-        if stderr:
-            return stdout.decode("utf-8"), stderr.decode("utf-8")
-        else:
-            return stdout.decode("utf-8")
+
+        if name not in non_blocking:
+            stdout, stderr = process.communicate(input)
+            if stderr:
+                return stdout.decode("utf-8"), stderr.decode("utf-8")
+            else:
+                return stdout.decode("utf-8")
 
 
 def load_ipython_extension(ip):
